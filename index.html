@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Основы Lua: Переменные, Типы данных и Объекты | Roblox Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f1a;--surface:#1a1a2e;--surface2:#16213e;--accent:#e03c28;--accent2:#00b4d8;--text:#f0f0f0;--text-dim:#9090a0;--success:#4caf50;--error:#f44336;--border:#2a2a4a;--progress:#e03c28}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;padding:1.2rem;max-width:820px;margin:0 auto;padding-top:2.5rem}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+#progress-bar-wrap{position:fixed;top:0;left:0;width:100%;height:6px;background:var(--border);z-index:999}
+#progress-bar{height:100%;width:0%;background:var(--progress);transition:width 0.4s}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+h1{font-size:1.8rem;font-weight:900;margin-bottom:0.3rem;color:var(--accent)}
+h2{font-size:1.2rem;font-weight:800;margin-bottom:1rem;color:var(--accent2)}
+.subtitle{color:var(--text-dim);font-size:0.95rem;margin-bottom:1rem}
+.lang-toggle{display:flex;gap:0.5rem;justify-content:flex-end;margin-bottom:1rem}
+.lang-btn{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:0.3rem 0.8rem;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;font-size:0.9rem}
+.lang-btn.active{background:var(--accent2);color:#000;border-color:var(--accent2)}
+.concepts{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem}
+.concepts li{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:0.4rem 0.9rem;font-size:0.9rem}
+.script-block{margin-bottom:1.2rem}
+.script-label{font-weight:700;color:var(--accent2);margin-bottom:0.4rem;font-size:0.95rem}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;font-size:0.85rem;color:#a8d8a8;position:relative}
+.copy-btn{position:absolute;top:0.5rem;right:0.5rem;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:0.2rem 0.6rem;font-size:0.8rem;cursor:pointer;font-family:'Nunito',sans-serif}
+.copy-btn:hover{background:var(--border)}
+textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-family:'Courier New',monospace;font-size:0.85rem;resize:vertical;margin-top:0.5rem}
+textarea:focus{outline:1px solid var(--accent2)}
+.check-btn{background:var(--accent);color:white;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-size:1rem;font-weight:700;cursor:pointer;margin-top:0.8rem;transition:opacity 0.2s;font-family:'Nunito',sans-serif}
+.check-btn:hover{opacity:0.85}
+.check-btn.small{padding:0.4rem 1rem;font-size:0.9rem}
+.result-msg{margin-top:0.5rem;font-weight:600;min-height:1.4em}
+.result-msg.success{color:var(--success)}
+.result-msg.error{color:var(--error)}
+.broken-code{background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:1rem;overflow-x:auto;font-size:0.85rem;color:#ff9999;margin-bottom:0.5rem}
+.quiz-question{background:var(--surface2);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.q-text{font-weight:700;margin-bottom:0.7rem;font-size:1rem}
+.options{display:flex;flex-direction:column;gap:0.3rem}
+.option-label{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.7rem;border-radius:8px;cursor:pointer;transition:background 0.15s;font-size:0.95rem}
+.option-label:hover{background:var(--border)}
+input[type=radio]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+#secret-word{font-size:3rem;font-weight:900;letter-spacing:0.2em;color:var(--accent);filter:blur(12px);transition:filter 0.8s;user-select:none;text-align:center;padding:1rem}
+#secret-hint{color:var(--text-dim);text-align:center;margin-top:0.5rem}
+.progress-label{text-align:right;font-size:0.8rem;color:var(--text-dim);margin-bottom:0.5rem}
+.tag{display:inline-block;background:var(--accent);color:white;border-radius:6px;padding:0.1rem 0.5rem;font-size:0.75rem;font-weight:700;margin-left:0.4rem;vertical-align:middle}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-top:0.5rem}
+.type-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.8rem}
+.type-card .type-name{font-weight:900;color:var(--accent2);font-size:1rem}
+.type-card code{display:block;margin-top:0.4rem;font-family:'Courier New',monospace;font-size:0.8rem;color:#a8d8a8;background:var(--bg);padding:0.4rem 0.6rem;border-radius:6px}
+@media(max-width:600px){body{padding:0.8rem;padding-top:2.5rem}.card{padding:1rem}#secret-word{font-size:2rem}.type-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div class="lang-toggle">
+  <button class="lang-btn" id="btn-ru" onclick="setLang('ru')">🇷🇺 RU</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+</div>
+
+<!-- HEADER -->
+<div class="card">
+  <h1 data-ru="🎮 Основы Lua: Переменные, Типы данных и Объекты" data-en="🎮 Lua Basics: Variables, Data Types & Objects"></h1>
+  <p class="subtitle" data-ru="Подготовка к тесту · Roblox Studio" data-en="Test Prep · Roblox Studio"></p>
+  <p class="progress-label"><span id="progress-text" data-ru="Выполнено заданий: 0 / 6" data-en="Tasks completed: 0 / 6"></span></p>
+</div>
+
+<!-- CHEATSHEET -->
+<div class="card">
+  <h2 data-ru="📋 Шпаргалка" data-en="📋 Cheatsheet"></h2>
+
+  <p style="font-weight:700;color:var(--accent2);margin-bottom:0.5rem" data-ru="🔑 Что такое переменная?" data-en="🔑 What is a variable?"></p>
+  <ul class="concepts">
+    <li data-ru="Переменная — именованная ячейка памяти для хранения данных" data-en="A variable is a named memory slot for storing data"></li>
+    <li data-ru="Синтаксис: local ИМЯ = ЗНАЧЕНИЕ" data-en="Syntax: local NAME = VALUE"></li>
+    <li data-ru="Имя переменной — слово СЛЕВА от знака =" data-en="Variable name — word to the LEFT of ="></li>
+    <li data-ru="Значение переменной — данные СПРАВА от знака =" data-en="Variable value — data to the RIGHT of ="></li>
+  </ul>
+
+  <p style="font-weight:700;color:var(--accent2);margin:1rem 0 0.5rem" data-ru="📦 Типы данных" data-en="📦 Data Types"></p>
+  <div class="type-grid">
+    <div class="type-card">
+      <div class="type-name">string</div>
+      <div class="ru" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem">Текст в кавычках</div>
+      <div class="en" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem;display:none">Text in quotes</div>
+      <code>local name = "Alex"</code>
+    </div>
+    <div class="type-card">
+      <div class="type-name">number</div>
+      <div class="ru" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem">Число (без кавычек)</div>
+      <div class="en" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem;display:none">Number (no quotes)</div>
+      <code>local score = 100</code>
+    </div>
+    <div class="type-card">
+      <div class="type-name">boolean</div>
+      <div class="ru" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem">Логический: true / false</div>
+      <div class="en" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem;display:none">Logical: true / false</div>
+      <code>local alive = true</code>
+    </div>
+    <div class="type-card">
+      <div class="type-name">table</div>
+      <div class="ru" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem">Список значений {}</div>
+      <div class="en" style="font-size:0.85rem;color:var(--text-dim);margin-top:0.2rem;display:none">List of values {}</div>
+      <code>local items = {"sword","shield"}</code>
+    </div>
+  </div>
+
+  <ul class="concepts" style="margin-top:1rem">
+    <li data-ru="Instance.new('Тип') — создаёт объект в игре" data-en="Instance.new('Type') — creates an object in game"></li>
+    <li data-ru="obj.Parent = ... — задаёт родителя объекта" data-en="obj.Parent = ... — sets the object's parent"></li>
+    <li data-ru="wait(n) — пауза n секунд" data-en="wait(n) — pause for n seconds"></li>
+  </ul>
+</div>
+
+<!-- SCRIPTS -->
+<div class="card">
+  <h2 data-ru="💾 Скрипты урока" data-en="💾 Lesson Scripts"></h2>
+
+  <div class="script-block">
+    <div class="script-label" data-ru="📝 Скрипт 1 — Переменные и типы данных" data-en="📝 Script 1 — Variables and data types"></div>
+    <div style="position:relative">
+      <pre><code class="luau-code">-- Переменные и типы данных / Variables and data types
+local playerName = "Alex"   -- string (текст / text)
+local score = 100            -- number (число / number)
+local isAlive = true         -- boolean (логический / boolean)
+local items = {"sword", "shield", "potion"}  -- table (список / list)
+
+print(playerName)  -- Alex
+print(score)       -- 100
+print(isAlive)     -- true
+print(items[1])    -- sword  (индекс с 1! / index starts at 1!)
+print(#items)      -- 3  (длина списка / list length)</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <div class="script-block">
+    <div class="script-label" data-ru="📝 Скрипт 2 — Instance.new и обратный отсчёт" data-en="📝 Script 2 — Instance.new and countdown"></div>
+    <div style="position:relative">
+      <pre><code class="luau-code">-- Создаём обратный отсчёт на экране
+-- Creating a countdown on screen
+
+-- 1. Создаём ScreenGui / Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+-- 2. Создаём TextLabel / Create TextLabel
+local label = Instance.new("TextLabel")
+label.Parent = screenGui
+label.Size = UDim2.new(0, 200, 0, 60)
+label.Position = UDim2.new(0.5, -100, 0.5, -30)
+label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.TextScaled = true
+label.Font = Enum.Font.GothamBold
+
+-- 3. Обратный отсчёт / Countdown loop
+for i = 10, 0, -1 do
+    label.Text = "⏱ " .. i  -- меняем текст / change text
+    wait(1)                   -- ждём 1 секунду / wait 1 second
+end
+
+label.Text = "🚀 Старт! / Start!"</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- TASK 1 -->
+<div class="card" id="task1">
+  <h2 data-ru="🔧 Задание 1: Исправь код" data-en="🔧 Task 1: Fix the code"></h2>
+  <p style="margin-bottom:0.7rem" data-ru="В коде ниже есть 4 ошибки. Найди их и перепиши скрипт правильно:" data-en="There are 4 mistakes in the code below. Find them and rewrite the script correctly:"></p>
+  <pre class="broken-code"><code>-- ОШИБОЧНЫЙ КОД / BUGGY CODE
+local 1player = "Max"     -- ❌
+local lives = "3"          -- ❌ должно быть число / should be a number
+local active = да          -- ❌ не правильное значение / wrong value
+local gear = ["sword", "bow"]  -- ❌ неверный синтаксис / wrong syntax
+
+for i = lives, 0, -1 do
+    print(i)
+    Wait(1)                -- ❌ неверный регистр / wrong case
+end</code></pre>
+
+  <textarea id="task1-input" rows="10"
+    data-placeholder-ru="Напиши исправленный код здесь..."
+    data-placeholder-en="Write the fixed code here..."></textarea>
+  <button class="check-btn" onclick="checkTask1()">
+    <span data-ru="✅ Проверить" data-en="✅ Check"></span>
+  </button>
+  <div id="task1-result" class="result-msg"></div>
+</div>
+
+<!-- TASK 2 -->
+<div class="card" id="task2">
+  <h2 data-ru="✍️ Задание 2: Напиши код" data-en="✍️ Task 2: Write code"></h2>
+  <p id="task2-prompt" style="margin-bottom:0.7rem"
+    data-ru="Напиши скрипт, который: создаёт переменную с именем игрока (string), очками (number), статусом игры (boolean: true), списком из 3 предметов (table). Выведи все переменные через print()."
+    data-en="Write a script that: creates a variable with the player name (string), score (number), game status (boolean: true), and a list of 3 items (table). Print all variables using print()."></p>
+  <textarea id="task2-input" rows="10"
+    data-placeholder-ru="Напиши свой код здесь..."
+    data-placeholder-en="Write your code here..."></textarea>
+  <button class="check-btn" onclick="checkTask2()">
+    <span data-ru="✅ Проверить" data-en="✅ Check"></span>
+  </button>
+  <div id="task2-result" class="result-msg"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="card" id="quiz">
+  <h2 data-ru="❓ Тест: 4 вопроса" data-en="❓ Quiz: 4 questions"></h2>
+
+  <!-- Q0 -->
+  <div class="quiz-question" id="q0">
+    <p class="q-text" data-ru="1. Что такое переменная в программировании?" data-en="1. What is a variable in programming?"></p>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q0" value="0" data-correct="false"><span data-ru="Специальная команда для создания объекта" data-en="A special command to create an object"></span></label>
+      <label class="option-label"><input type="radio" name="q0" value="1" data-correct="true"><span data-ru="Именованная ячейка памяти для хранения значения" data-en="A named memory slot for storing a value"></span></label>
+      <label class="option-label"><input type="radio" name="q0" value="2" data-correct="false"><span data-ru="Тип данных в Lua" data-en="A data type in Lua"></span></label>
+      <label class="option-label"><input type="radio" name="q0" value="3" data-correct="false"><span data-ru="Функция для вывода текста на экран" data-en="A function to display text on screen"></span></label>
+    </div>
+    <button class="check-btn small" onclick="checkQuiz(0)"><span data-ru="Проверить" data-en="Check"></span></button>
+    <div id="q0-result" class="result-msg"></div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="quiz-question" id="q1">
+    <p class="q-text" data-ru='2. Какой тип данных у значения "Привет"?' data-en='2. What data type is the value "Hello"?'></p>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q1" value="0" data-correct="false"><span data-ru="number" data-en="number"></span></label>
+      <label class="option-label"><input type="radio" name="q1" value="1" data-correct="false"><span data-ru="boolean" data-en="boolean"></span></label>
+      <label class="option-label"><input type="radio" name="q1" value="2" data-correct="true"><span data-ru="string" data-en="string"></span></label>
+      <label class="option-label"><input type="radio" name="q1" value="3" data-correct="false"><span data-ru="table" data-en="table"></span></label>
+    </div>
+    <button class="check-btn small" onclick="checkQuiz(1)"><span data-ru="Проверить" data-en="Check"></span></button>
+    <div id="q1-result" class="result-msg"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz-question" id="q2">
+    <p class="q-text" data-ru="3. Что делает команда wait(3) в скрипте?" data-en="3. What does the wait(3) command do in a script?"></p>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q2" value="0" data-correct="true"><span data-ru="Ставит выполнение скрипта на паузу на 3 секунды" data-en="Pauses script execution for 3 seconds"></span></label>
+      <label class="option-label"><input type="radio" name="q2" value="1" data-correct="false"><span data-ru="Удаляет объект через 3 секунды" data-en="Deletes an object after 3 seconds"></span></label>
+      <label class="option-label"><input type="radio" name="q2" value="2" data-correct="false"><span data-ru="Повторяет следующую строку кода 3 раза" data-en="Repeats the next line of code 3 times"></span></label>
+      <label class="option-label"><input type="radio" name="q2" value="3" data-correct="false"><span data-ru="Создаёт переменную со значением 3" data-en="Creates a variable with value 3"></span></label>
+    </div>
+    <button class="check-btn small" onclick="checkQuiz(2)"><span data-ru="Проверить" data-en="Check"></span></button>
+    <div id="q2-result" class="result-msg"></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="quiz-question" id="q3">
+    <p class="q-text" data-ru="4. Как правильно создать объект TextLabel в Roblox Studio?" data-en="4. How do you correctly create a TextLabel object in Roblox Studio?"></p>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q3" value="0" data-correct="false"><span>new.Instance("TextLabel")</span></label>
+      <label class="option-label"><input type="radio" name="q3" value="1" data-correct="false"><span>create("TextLabel")</span></label>
+      <label class="option-label"><input type="radio" name="q3" value="2" data-correct="true"><span>Instance.new("TextLabel")</span></label>
+      <label class="option-label"><input type="radio" name="q3" value="3" data-correct="false"><span>TextLabel.new()</span></label>
+    </div>
+    <button class="check-btn small" onclick="checkQuiz(3)"><span data-ru="Проверить" data-en="Check"></span></button>
+    <div id="q3-result" class="result-msg"></div>
+  </div>
+</div>
+
+<!-- SECRET WORD -->
+<div class="card" id="secret-section">
+  <h2 data-ru="🏆 Секретное слово" data-en="🏆 Secret Word"></h2>
+  <p style="text-align:center;margin-bottom:1rem" data-ru="Скажи это слово учителю, чтобы получить пятёрку!" data-en="Tell this word to your teacher to get full marks!"></p>
+  <div id="secret-word">BRICK</div>
+  <p id="secret-hint" data-ru="⬆️ Выполни все задания и ответь на все вопросы, чтобы увидеть слово!" data-en="⬆️ Complete all tasks and answer all questions to reveal the word!"></p>
+</div>
+
+<script>
+var lang='ru';
+var task1Done=false,task2Done=false;
+var quizDone=[false,false,false,false];
+var completedCount=0;
+var TOTAL=6;
+
+var task1Keywords=['local player','lives = 3','= true','= {','wait('];
+var task2Keywords=['local','= true','{','print('];
+
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('[data-ru]').forEach(function(el){
+    if(el.tagName!=='INPUT'&&el.tagName!=='TEXTAREA') el.textContent=el.dataset[l];
+  });
+  document.querySelectorAll('[data-placeholder-ru]').forEach(function(el){
+    el.placeholder=l==='ru'?el.dataset.placeholderRu:el.dataset.placeholderEn;
+  });
+  document.querySelectorAll('.ru,.en').forEach(function(el){
+    el.style.display=el.classList.contains(l)?'':'none';
+  });
+  document.getElementById('btn-ru').classList.toggle('active',l==='ru');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  updateProgressLabel();
+}
+
+function updateProgress(){
+  completedCount=[task1Done,task2Done].concat(quizDone).filter(Boolean).length;
+  var pct=(completedCount/TOTAL)*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  updateProgressLabel();
+  if(completedCount===TOTAL) revealSecret();
+}
+
+function updateProgressLabel(){
+  var el=document.getElementById('progress-text');
+  if(lang==='ru') el.textContent='Выполнено заданий: '+completedCount+' / '+TOTAL;
+  else el.textContent='Tasks completed: '+completedCount+' / '+TOTAL;
+}
+
+function checkTask1(){
+  var val=document.getElementById('task1-input').value.toLowerCase().replace(/\s+/g,' ');
+  var missing=task1Keywords.filter(function(k){return val.indexOf(k.toLowerCase())===-1;});
+  var res=document.getElementById('task1-result');
+  if(missing.length===0){
+    res.className='result-msg success';
+    res.textContent=lang==='ru'?'✅ Отлично! Все ошибки исправлены.':'✅ Great! All mistakes are fixed.';
+    if(!task1Done){task1Done=true;updateProgress();}
+  } else {
+    res.className='result-msg error';
+    var hint=lang==='ru'
+      ?'❌ Почти! Проверь использование: '+missing.join(', ')
+      :'❌ Almost! Check the usage of: '+missing.join(', ');
+    res.textContent=hint;
+  }
+}
+
+function checkTask2(){
+  var val=document.getElementById('task2-input').value.toLowerCase();
+  var missing=task2Keywords.filter(function(k){return val.indexOf(k.toLowerCase())===-1;});
+  var res=document.getElementById('task2-result');
+  if(missing.length===0){
+    res.className='result-msg success';
+    res.textContent=lang==='ru'?'✅ Супер! Код написан правильно.':'✅ Super! The code is correct.';
+    if(!task2Done){task2Done=true;updateProgress();}
+  } else {
+    res.className='result-msg error';
+    var hint=lang==='ru'
+      ?'❌ Не хватает: '+missing.join(', ')
+      :'❌ Missing: '+missing.join(', ');
+    res.textContent=hint;
+  }
+}
+
+function checkQuiz(i){
+  var selected=document.querySelector('input[name="q'+i+'"]:checked');
+  var res=document.getElementById('q'+i+'-result');
+  if(!selected){
+    res.className='result-msg error';
+    res.textContent=lang==='ru'?'Выбери ответ!':'Select an answer!';
+    return;
+  }
+  if(selected.dataset.correct==='true'){
+    res.className='result-msg success';
+    res.textContent=lang==='ru'?'✅ Правильно!':'✅ Correct!';
+    if(!quizDone[i]){quizDone[i]=true;updateProgress();}
+    document.querySelectorAll('input[name="q'+i+'"]').forEach(function(r){r.disabled=true;});
+  } else {
+    res.className='result-msg error';
+    res.textContent=lang==='ru'?'❌ Неверно, попробуй ещё раз.':'❌ Wrong, try again.';
+  }
+}
+
+function revealSecret(){
+  document.getElementById('secret-word').style.filter='none';
+  document.getElementById('secret-hint').style.display='none';
+  triggerConfetti();
+}
+
+function triggerConfetti(){
+  var style=document.createElement('style');
+  style.textContent='@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}';
+  document.head.appendChild(style);
+  var colors=['#e03c28','#00b4d8','#ffd700','#4caf50','#ff69b4'];
+  for(var i=0;i<50;i++){
+    (function(idx){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.style.cssText='position:fixed;top:-10px;left:'+Math.random()*100+'vw;width:8px;height:8px;background:'+colors[idx%5]+';border-radius:2px;animation:fall '+(1+Math.random()*2)+'s linear forwards;z-index:9999;pointer-events:none';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},3000);
+      },idx*40);
+    })(i);
+  }
+}
+
+function copyCode(btn){
+  var code=btn.previousElementSibling.querySelector('code').textContent;
+  navigator.clipboard.writeText(code).catch(function(){});
+  btn.textContent='✓';
+  setTimeout(function(){btn.textContent='Copy';},1500);
+}
+
+setLang('ru');
+</script>
+</body>
+</html>
